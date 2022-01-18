@@ -2,25 +2,43 @@
 /**
  * slack上で欲しい言葉をくれるボット
  */
-const praiseWords = [
+// FileSystem
+const fs = require('fs');
+// 保存先
+const fileName = './praise.json';
+// デフォルト
+let praiseWords = [
     {index:1, msg:"今日はよくがんばりました。すごいです。"},
     {index:2, msg:"生きていてくれて嬉しいです。ありがとう。"},
     {index:3, msg:"あなたの頑張りは私だけが知っています。お疲れ様でした。"},
     {index:4, msg:"あなたの優しさはきっと届いています。"},
     {index:5, msg:"今のあなたはイケてます。すごくいい感じです。"},
-    {index:6, msg:"たくさんがんばりましたね。今日もお疲れ様でした。"},        
+    {index:6, msg:"たくさんがんばりましたね。今日もお疲れ様でした。"}        
 ];
+/**
+ * 登録された言葉を保存する
+ */
+function saveWords(){
+    fs.writeFileSync(fileName, JSON.stringify(praiseWords), 'utf8');
+}
+
+try{
+    const data = fs.readFileSync(fileName, 'utf8');
+    praiseWords = JSON.parse(data);
+}catch(ignore){
+    console.log(fileName + 'から復元できませんでした');
+}
 /**
  * インデックスの最大値にプラス1をする
  * @returns 最大値
  */
- function maxIndex(){
+function maxIndex(){
     let newInt = 1;
     //配列のindexのみ取得
     const maxArray = praiseWords.map(m => m.index);
     //最大値
     for(let max of maxArray){
-        if(max >= newInt){
+        if(max > newInt){
             newInt = max + 1;
         }
     }
@@ -32,9 +50,11 @@ const praiseWords = [
  * @param {string} msg  メンションするメッセージ
  */
 function addPraise(msg){
-    //indexの最大値取得
+    //indexの最大値取得    
     const newIndex = maxIndex();
     praiseWords.push({index:newIndex, msg:msg});
+    // SaveFile
+    saveWords();
 }
 /**
  * 指定したインデックスでメッセージの削除
@@ -45,6 +65,7 @@ function delPraise(index){
     const indx = praiseWords.findIndex(p => p.index === index);
     if(indx !== -1){
         praiseWords.splice(indx, 1);
+        saveWords();
     }
 }
 /**
